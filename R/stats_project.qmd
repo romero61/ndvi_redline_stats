@@ -1,0 +1,53 @@
+---
+title: "income test"
+format: html
+editor: visual
+---
+
+## 
+
+```{r}
+# Set your file path here! Or, set this up as an .Rproj if you'd like.
+rootdir <- ("/Users/guillermoromero/Documents/MEDS/eds222_stats/")
+
+# This runs the script _common.R, which loads all the packages we'll need for today and does some extra stuff we won't really use, at least for now.
+source(file.path(rootdir,"Labs","_common.R"))
+library(tidyverse)
+library(readxl)
+library(modelr)
+library(gt)
+
+```
+
+```{r}
+income <- read_excel("~/Documents/MEDS/eds222_stats/project/income_ndvi.xlsx") %>% 
+  pivot_longer(!year, names_to = "group", values_to = "income")
+
+ndvi <- read_excel("~/Documents/MEDS/eds222_stats/project/ndvi_decade.xlsx") %>% 
+  pivot_longer(!year, names_to = "group", values_to = "ndvi") %>% 
+  select(ndvi)
+
+ndvi_income <- cbind(income,ndvi) 
+
+ndvi_income <- ndvi_income %>% 
+  mutate(grade = if_else(grepl('A', group), "A", "D" )) %>% mutate(grade =factor(grade))
+
+```
+
+```{r}
+mod <- lm(ndvi ~ income + grade, data = ndvi_income )
+summary(mod)
+```
+
+```{r}
+augment(mod)
+```
+
+```{r}
+ndvi_income |> 
+  ggplot(aes(x = income, y = ndvi, color = grade)) +
+  geom_point() +
+  geom_line(data = augment(mod), aes(y = .fitted)) + 
+  labs(x = "income",
+       y = "ndvi") 
+```

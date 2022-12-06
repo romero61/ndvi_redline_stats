@@ -1,0 +1,23 @@
+```{r}
+ggplot(predictions) + geom_histogram(aes(residuals), bins = 25)
+mean(predictions$residuals)
+ggplot(predictions) + geom_point(aes(x = income, y = residuals), size =2)
+```
+
+$$ \text{NDVI}_i = \beta_0 + \beta_1 \text{income}_i + \varepsilon_i $$
+```{r}
+predictions <- ndvi_income0 %>% 
+  modelr::add_predictions(mod) %>% 
+  mutate(residuals = ndvi-pred)
+
+lm(ndvi ~ income + holc_grade + income:holc_grade, data = ndvi_income0 ) %>% tidy() %>% 
+  gt()
+```
+
+Intercept - AVG NDVI is 0.0302when income is zero in region graded D
+
+Income - As income increases NDVI decreases by .00000108
+
+hocl_gradeA - the average difference in NDVI is 0.140 when the region is graded A
+
+income:hocl_gradeA - the impact of income on NDVI is -0.00000211 in region graded A versus a region graded D.

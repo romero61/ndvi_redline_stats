@@ -4,10 +4,7 @@ format:
   revealjs:
     panel: fill
 editor: visual
-
 ---
-
-
 
 ```{r}
 #| echo: false
@@ -107,6 +104,7 @@ How does NDVI change with income in redlined areas?
 :::
 
 # Data Exploration
+
 Check the X variable has variation
 
 ```{r}
@@ -115,9 +113,9 @@ var(ndvi_income0$income_mindiv2) != 0
 ```
 
 # Data Exploration
+
 ::: panel-tabset
 ### Boxplots
-
 
 ```{r}
 pal <- c('firebrick1','deepskyblue')
@@ -130,7 +128,9 @@ subplot(income_box, ndvi_box) %>%
    layout(autosize = F)
 
 ```
+
 ### Histograms
+
 ```{r}
 hist_income <- plot_ly(ndvi_income0, x = ~income, type = 'histogram', colors = pal ) 
 
@@ -176,7 +176,9 @@ subplot(fig, figlog) %>%
 :::
 
 # OLS Interaction Raw Data {.smaller}
+
 $$ \text{NDVI}_i = \beta_0 + \beta_1 \text{income}_i + \beta_2Grade + \beta_3income*Grade + \varepsilon_i $$
+
 ```{r}
 #| echo: true
 mod <- lm(ndvi ~ income + holc_grade + income:holc_grade, data = ndvi_income0 )
@@ -187,8 +189,8 @@ summary(mod)$adj.r.squared
 
 # OLS log-log interaction {.smaller}
 
-$$ \text{log(NDVI)}_i = \beta_0 + \beta_1 \text{log(income)}_i + \beta_2Grade + \beta_3log(income)*Grade + \varepsilon_i $$
-Adjusted R-squared
+$$ \text{log(NDVI)}_i = \beta_0 + \beta_1 \text{log(income)}_i + \beta_2Grade + \beta_3log(income)*Grade + \varepsilon_i $$ Adjusted R-squared
+
 ```{r}
 #| echo: true
 mod0 <- lm(ndvi_log ~ income_log + holc_grade + income_log:holc_grade, data = ndvi_income0 )
@@ -196,9 +198,10 @@ summary(mod0)$adj.r.squared
 ```
 
 # Residuals {.smaller}
-::: panel-tabset
 
+::: panel-tabset
 ### Distribution
+
 ```{r}
 #| panel: fill
 #| fig-width: 5
@@ -212,7 +215,7 @@ ggplot(predictionslog) + geom_histogram(aes(residuals), bins = 25)
 
 ```
 
-### Variance  {.smaller}
+### Variance {.smaller}
 
 ```{r}
 ggplot(predictionslog) + geom_point(aes(x = income_log, y = residuals), size =2)
@@ -221,7 +224,7 @@ ggplot(predictionslog) + geom_point(aes(x = income_log, y = residuals), size =2)
 
 # Coefficients {.smaller}
 
-$$ \text{log(NDVI)}_i = -0.170 + (-0.121) \text{log(temp)}_i + (-0.729)Grade + (0.134)log(income)*Grade + \varepsilon_i $$
+$$ \text{log(NDVI)}_i = -0.170 + (-0.121) \text{log(income)}_i + (-0.729)Grade + (0.134)log(income)*Grade + \varepsilon_i $$
 
 ```{r}
 lm(ndvi_log ~ income_log + holc_grade + income_log:holc_grade, data = ndvi_income0 ) %>% tidy() %>% 
@@ -235,6 +238,7 @@ For every 1% increase in the independent variable INCOME, our dependent variable
 The percentage of the impact of region grade on NDVI, is 42.07 higher in Region graded A than it is in region graded D.
 
 # Plot {.smaller}
+
 ```{r}
 income_percent <- round(exp(coef(mod0)["income_log"] - 1) * 100,2)
 grade_percent <- round(exp(coef(mod0)["holc_gradeA"] - 1) * 100,2)
@@ -252,9 +256,11 @@ lm_plot <- ndvi_income0 |>
 lm_plot
 ```
 
-# Hypothesis Testing{.smaller} 
+# Hypothesis Testing {.smaller}
+
 ::: panel-tabset
-###  Difference{.smaller}
+### Difference {.smaller}
+
 ```{r}
 ndvi_income_90 <- ndvi_income %>% 
   filter(year == 1990)
@@ -269,14 +275,19 @@ a.  $$H_{0}: \mu_{ndvi20gradeD} - \mu_{ndvi90gradeD} = 0 $$ $$H_{A}: \mu_{ndvi20
 ```{r}
 t.test(ndvi_income_20$ndvi[ndvi_income_20$holc_grade=='D'],ndvi_income_90$ndvi[ndvi_income_90$holc_grade=='D'])
 ```
-### <0{.smaller}
+
+### \<0 {.smaller}
+
 ```{r}
 t.test(ndvi_income_20$ndvi[ndvi_income_20$holc_grade=='D'],ndvi_income_90$ndvi[ndvi_income_90$holc_grade=='D'],alternative = 'less')
 ```
 :::
-# Region A VS D in 2020{.smaller}
+
+# Region A VS D in 2020 {.smaller}
+
 ::: panel-tabset
-### Difference{.smaller}
+### Difference {.smaller}
+
 a.  $$H_{0}: \mu_{ndvi20gradeA} - \mu_{ndvi20gradeD} = 0 $$
 
     $$H_{A}: \mu_{ndvi20gradeA} - \mu_{ndvi20gradeD}  \neq 0$$
@@ -284,16 +295,19 @@ a.  $$H_{0}: \mu_{ndvi20gradeA} - \mu_{ndvi20gradeD} = 0 $$
 ```{r}
 t.test(ndvi_income_20$ndvi[ndvi_income_20$holc_grade=='A'],ndvi_income_20$ndvi[ndvi_income_20$holc_grade=='D'])
 ```
-### >0{.smaller}
+
+### \>0 {.smaller}
+
 ```{r}
 t.test(ndvi_income_20$ndvi[ndvi_income_20$holc_grade=='A'],ndvi_income_20$ndvi[ndvi_income_20$holc_grade=='D'], alternative = 'greater')
 ```
 :::
+
 # References
 
 [The log-0 problem: analysis strategies and options for choosing c in log(y + c) (rbind.io)](https://aosmith.rbind.io/2018/09/19/the-log-0-problem/)
 
-Nardone, Anthony, et al. “Redlines and Greenspace: The Relationship between Historical Redlining and 2010 Greenspace across the United States.” National Institute of Environmental Health Sciences, U.S. Department of Health and Human Services, 27 Jan.2021, https://ehp.niehs.nih.gov/doi/10.1289/EHP7495.
+Nardone, Anthony, et al. "Redlines and Greenspace: The Relationship between Historical Redlining and 2010 Greenspace across the United States." National Institute of Environmental Health Sciences, U.S. Department of Health and Human Services, 27 Jan.2021, https://ehp.niehs.nih.gov/doi/10.1289/EHP7495.
 
 Casey, J.A.; James, P.; Cushing, L.; Jesdale, B.M.; Morello-Frosch, R. Race, Ethnicity, Income Concentration and 10-Year Change in Urban Greenness in the United States. Int. J. Environ. Res. Public Health 2017, 14, 1546, doi.org/10.3390/ijerph14121546
 
